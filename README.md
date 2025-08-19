@@ -1,4 +1,4 @@
-LIBASM - a small library of utils functions writtent in x86 assembly
+LIBASM - a small library of utils functions written in x64 assembly
 
 ```
 ssize_t  ft_write(int fd, void const *buf, size_t size);
