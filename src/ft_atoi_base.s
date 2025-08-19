@@ -3,11 +3,11 @@ global	ft_atoi_base
 P_STR		equ	8
 P_BASE		equ	16
 I_BLEN		equ	24
-B_SIGN    equ 32
+B_SIGN		equ	32
 
 section	.data
 	INVALID		db	"+-", 0x9, 0xA, 0xB, 0xC, 0x2, 0x20, 0x0
-	extern	ft_strlen
+	extern		ft_strlen
 
 section	.text
 
@@ -31,17 +31,16 @@ ft_atoi_base:
 
 	mov	[rbp-I_BLEN], rax
 		
+	; check for invalid character
 	mov	rcx, 0
 	xor	rsi, rsi
-
-	; check for invalid character
 
 	.invalid_char_while:
 	mov	rdi, INVALID
 	mov	rbx, [rbp-P_BASE]
 	mov	sil, [rbx+rcx]
 	cmp	sil, 0x0
-	je	.invalid_char_finished
+	je	.duplicate_char_start
 	push	rcx
 	call	contains
 	pop	rcx
@@ -50,11 +49,10 @@ ft_atoi_base:
 	inc	rcx
 	jmp	.invalid_char_while
 
-	.invalid_char_finished:
+	; check for duplicate character
+	.duplicate_char_start:
 	mov	rcx, 0
 	xor	rsi, rsi
-
-	; check for duplicate character
 	
 	.duplicate_char_while:
 	mov	rdi, [rbp-P_BASE]
@@ -62,7 +60,7 @@ ft_atoi_base:
 	mov	sil, [rdi]
 	inc	rdi
 	cmp	sil, 0x0
-	je	.duplicate_char_finished
+	je	.sign_start
 	push	rcx	
 	call	contains
 	pop	rcx
@@ -71,7 +69,7 @@ ft_atoi_base:
 	inc	rcx
 	jmp	.duplicate_char_while
 
-	.duplicate_char_finished:
+	.sign_start:
   	mov	rdi, [rbp-P_STR]
   	xor	rcx, rcx
 
@@ -80,16 +78,16 @@ ft_atoi_base:
   	cmp	cl, '+'
   	je	.sign_continue
   	cmp	cl, '-'
-  	jne	.calculate_number
+  	jne	.calculate_number_start
   	neg	qword [rbp-B_SIGN]  
   	.sign_continue:
   	inc	rdi
   	jmp	.sign_while
 
-  	.calculate_number:
-  	mov	rax, 0	; number
+  	.calculate_number_start:
+  	mov	rax, 0	; final number
 
-	.while:
+	.calculate_number_while:
   	mov	cl, [rdi]
   	cmp	cl, 0x0
   	je	.endcount 
@@ -98,17 +96,17 @@ ft_atoi_base:
 	push	rdi
 	mov	rdi, [rbp-P_BASE]
 	push	rax
-  	call	contains
-  	mov	rcx, rax  ; number position in base in rcx
+  	call	contains	; rdi = base, rsi = current string char
+  	mov	rcx, rax	; number position in base
 	pop	rax
 	pop	rdi
 	cmp	rcx, -1
   	je	.endcount
   	; ret += (ret * base_length) + (get num in base)	
-  	mul	qword [rbp-I_BLEN] ; multiply number by base length
-  	add	rax, rcx  ; add len position
-  	inc	rdi       ; go to next character in str
-  	jmp	.while
+  	mul	qword [rbp-I_BLEN]	; multiply number by base length
+  	add	rax, rcx		; add len position
+  	inc	rdi			; go to next character in str
+  	jmp	.calculate_number_while
 
   	.endcount:
   	cmp	qword [rbp-B_SIGN], 1
@@ -124,25 +122,25 @@ ft_atoi_base:
 	pop	rbp
 	ret
 
-	contains: ; rdi = *str, rsi = char
-		mov	rax, rdi
-		xor	rbx, rbx
-		
-		.while_notinbase:
-		mov	bl, [rax]
-		cmp	bl, 0
-		jz	.exit_notinbase
-		cmp	bl, sil
-		jz	.exit_inbase
-		inc	rax
-		jmp	.while_notinbase
+contains: ; rdi = *str, rsi = char
+	mov	rax, rdi
+	xor	rbx, rbx
+	
+	.while_not_in_base:
+	mov	bl, [rax]
+	cmp	bl, 0
+	jz	.exit_not_in_base
+	cmp	bl, sil
+	jz	.exit_in_base
+	inc	rax
+	jmp	.while_not_in_base
 
-		.exit_inbase:
-		sub	rax, rdi
-		jmp	.exit_base		
+	.exit_in_base:
+	sub	rax, rdi
+	jmp	.exit_base		
 
-		.exit_notinbase:
-		mov	rax, -1
+	.exit_not_in_base:
+	mov	rax, -1
 		
-		.exit_base:
-		ret
+	.exit_base:
+	ret
