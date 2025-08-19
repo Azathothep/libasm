@@ -26,7 +26,7 @@ NAME = libasm.a
 
 ASM = nasm
 
-ASM_FLAGS = -f elf64 -g
+ASM_FLAGS = -f elf64
 
 INCLUDES = libasm.h
 

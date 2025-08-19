@@ -34,7 +34,7 @@ LIBASM_INCLUDES = libasm.h
 
 CC = gcc
 
-CC_FLAGS = -Wall -Wextra -Werror -z noexecstack -no-pie -fno-pie -g
+CC_FLAGS = -Wall -Wextra -Werror -z noexecstack -no-pie -fno-pie
 
 #----------- RULES ----------#
 
